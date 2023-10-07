@@ -10,7 +10,6 @@ data Term : Set where
     lam : (e : Term) -> Term
     cc : Term
 
-    lit : (n : Bool) -> Term
 
 
 mutual
@@ -31,11 +30,20 @@ data State : Set where
     st : Closure -> Cont -> State
     halt : String -> State
 
+
+appe : Cont -> Closure -> Cont
+appe [] φ       = φ :: []
+appe (x :: π) φ = x :: (appe π φ)
+
+lam-depth : Term -> Nat
+lam-depth (lam t) = 1 + (lam-depth t)
+lam-depth t       = 0
+
 -- way I interpret it, however many arguments, reducing all is one step
 exec-lam : Closure -> Cont -> State
 exec-lam (pair (lam t) e) [] = halt "Congrats, a lambda expression"
-exec-lam (pair (lam (lam t)) (env e φ)) (x₁ :: c) = exec-lam (pair (lam t) (env e (x₁ :: φ) )) c
-exec-lam (pair (lam t) (env e φ)) (x₁ :: c) = st (pair t (env e (x₁ :: φ) )) c
+exec-lam (pair (lam (lam t)) (env e φ)) (x₁ :: c) = exec-lam (pair (lam t) (env e (appe φ x₁) )) c
+exec-lam (pair (lam t) (env e φ)) (x₁ :: c) = st (pair t (env e (appe φ x₁) )) c
 exec-lam _ _ = halt "build away" -- TODO type should be restricted for this to not be a case
 
 
@@ -64,6 +72,5 @@ run (suc n) s        = run n (exec s)
 
 eval : Closure -> Cont -> State
 eval φ π = run 10 (st φ π)
-
-
-
+ 
+ 

@@ -8,7 +8,6 @@ termStr p < v , k > = showString "<" ∘ shows v ∘ showString "," ∘ shows k 
 termStr p (app u v) = showString "(" ∘ termStr p u ∘ termStr p v ∘ showString ")"
 termStr p (lam t)   = showString "λ." ∘ termStr p t
 termStr p cc        = showString "cc"
-termStr p (lit n)   = shows n
 
 mutual 
     envStr : Nat -> Env -> ShowS
